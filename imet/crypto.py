@@ -1,4 +1,4 @@
-"""Authenticated symmetric encryption for HushLine.
+"""Authenticated symmetric encryption for iMET.
 
 The real (secret) message is encrypted with AES-256-GCM. The 256-bit key is
 derived from a human-sharable *code* with scrypt, using a fresh random salt for
@@ -85,7 +85,7 @@ def decrypt(blob: bytes, code: str) -> str:
     if len(blob) < min_len:
         raise DecryptionError("blob too short")
     if blob[: len(MAGIC)] != MAGIC:
-        raise DecryptionError("not a HushLine blob")
+        raise DecryptionError("not an iMET blob")
 
     offset = len(MAGIC)
     version = blob[offset]

@@ -88,7 +88,7 @@ def run_watcher(code: str, cover: str, trigger: str = ">>",
     clip = _Clipboard()
     last_seen = None
 
-    print("HushLine watcher running. Press Ctrl+C to stop.")
+    print("iMET watcher running. Press Ctrl+C to stop.")
     print(f"  - Copy text starting with '{trigger}' to hide + re-copy it.")
     print("  - Copy a received message to reveal a hidden one.")
 
@@ -119,7 +119,7 @@ def run_watcher(code: str, cover: str, trigger: str = ">>",
             last_seen = carrier
             print(f"[hidden]  secret encrypted into cover text -> clipboard "
                   f"ready to paste ({len(secret)} chars)")
-            _notify("HushLine", "Secret hidden. Paste it into your chat.")
+            _notify("iMET", "Secret hidden. Paste it into your chat.")
             continue
 
         if is_carrier(current):
@@ -130,15 +130,15 @@ def run_watcher(code: str, cover: str, trigger: str = ">>",
             except DecryptionError:
                 print("[reveal]  hidden message found, but the code is wrong "
                       "or it was altered.")
-                _notify("HushLine", "Hidden message: wrong code / altered.")
+                _notify("iMET", "Hidden message: wrong code / altered.")
                 continue
             print(f"[reveal]  {revealed}")
-            _notify("HushLine - revealed message", revealed)
+            _notify("iMET - revealed message", revealed)
 
 
 if __name__ == "__main__":
-    # Allow `python -m hushline.watcher <code>` for quick testing.
+    # Allow `python -m imet.watcher <code>` for quick testing.
     if len(sys.argv) < 2:
-        print("usage: python -m hushline.watcher <code>", file=sys.stderr)
+        print("usage: python -m imet.watcher <code>", file=sys.stderr)
         raise SystemExit(1)
     raise SystemExit(run_watcher(sys.argv[1], cover="hey! how's your vacation going?"))

@@ -1,31 +1,31 @@
-"""Command-line interface for HushLine.
+"""Command-line interface for iMET.
 
 Examples
 --------
 Generate a code and share it with the other device (in person / over a channel
 you already trust)::
 
-    $ hushline newcode
+    $ imet newcode
     willow-ember-quartz-otter-lantern-reef
 
-Save the code so you don't retype it every time (stored at ~/.hushline/code,
+Save the code so you don't retype it every time (stored at ~/.imet/code,
 readable only by you)::
 
-    $ hushline setcode willow-ember-quartz-otter-lantern-reef
+    $ imet setcode willow-ember-quartz-otter-lantern-reef
 
 Hide a secret message inside an innocent cover and copy the result into your
 chat app::
 
-    $ hushline hide "meet me at 8" --cover "hey how's your vacation?"
+    $ imet hide "meet me at 8" --cover "hey how's your vacation?"
 
 Reveal a message you received (paste it on stdin or pass it as an argument)::
 
-    $ hushline reveal "hey how's your vacation?"
+    $ imet reveal "hey how's your vacation?"
 
 Run the background watcher that transparently reveals incoming carriers and
 re-hides anything you prefix with the trigger as you copy it::
 
-    $ hushline watch
+    $ imet watch
 """
 
 from __future__ import annotations
@@ -38,9 +38,9 @@ from pathlib import Path
 
 from . import DecryptionError, StegoError, codes, conceal, is_carrier, recover
 
-_CONFIG_DIR = Path(os.path.expanduser("~")) / ".hushline"
+_CONFIG_DIR = Path(os.path.expanduser("~")) / ".imet"
 _CODE_FILE = _CONFIG_DIR / "code"
-_ENV_VAR = "HUSHLINE_CODE"
+_ENV_VAR = "IMET_CODE"
 
 
 def _load_code(explicit: str | None) -> str:
@@ -53,7 +53,7 @@ def _load_code(explicit: str | None) -> str:
     if _CODE_FILE.exists():
         return _CODE_FILE.read_text(encoding="utf-8").strip()
     raise SystemExit(
-        "No code available. Pass --code, set $%s, or run 'hushline setcode'."
+        "No code available. Pass --code, set $%s, or run 'imet setcode'."
         % _ENV_VAR
     )
 
@@ -128,7 +128,7 @@ def cmd_watch(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="hushline",
+        prog="imet",
         description="Hide an encrypted message inside an ordinary-looking one.",
     )
     p.add_argument("--code", help="shared code (overrides env var and saved file)")
@@ -140,7 +140,7 @@ def build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--bytes", type=int, default=20, help="entropy bytes (base32)")
     pc.set_defaults(func=cmd_newcode)
 
-    ps = sub.add_parser("setcode", help="save a shared code to ~/.hushline/code")
+    ps = sub.add_parser("setcode", help="save a shared code to ~/.imet/code")
     ps.add_argument("code", nargs="?", help="code to save (or read from stdin)")
     ps.set_defaults(func=cmd_setcode)
 

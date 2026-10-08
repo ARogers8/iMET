@@ -1,6 +1,6 @@
 """Simple on-disk contact book: name + iMessage handle (phone or email).
 
-Stored as JSON at ``~/.hushline/contacts.json``. This holds no secrets (the
+Stored as JSON at ``~/.imet/contacts.json``. This holds no secrets (the
 encryption code is never written here), just who you message.
 """
 
@@ -11,7 +11,7 @@ import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
-_CONFIG_DIR = Path(os.path.expanduser("~")) / ".hushline"
+_CONFIG_DIR = Path(os.path.expanduser("~")) / ".imet"
 _CONTACTS_FILE = _CONFIG_DIR / "contacts.json"
 
 

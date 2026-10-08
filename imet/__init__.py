@@ -1,4 +1,4 @@
-"""HushLine -- hide an encrypted message inside an ordinary-looking one.
+"""iMET -- hide an encrypted message inside an ordinary-looking one.
 
 High-level flow:
 
@@ -7,9 +7,9 @@ High-level flow:
 
     secret = recover(received_text, code)  # -> "meet me at 8"
 
-The content is protected by AES-256-GCM (see :mod:`hushline.crypto`); the fact
+The content is protected by AES-256-GCM (see :mod:`imet.crypto`); the fact
 that there *is* a hidden message is disguised by zero-width steganography (see
-:mod:`hushline.stego`).
+:mod:`imet.stego`).
 """
 
 from __future__ import annotations
@@ -55,5 +55,5 @@ def recover(carrier: str, code: str) -> str:
 
 
 def is_carrier(text: str) -> bool:
-    """True if ``text`` appears to carry a hidden HushLine payload."""
+    """True if ``text`` appears to carry a hidden iMET payload."""
     return stego.has_hidden_payload(text)

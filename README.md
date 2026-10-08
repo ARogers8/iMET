@@ -1,4 +1,4 @@
-# HushLine
+# iMET — iMessage Encryption Tool
 
 Send a message that **looks** like ordinary chatter — *"hey! how's your
 vacation going?"* — but secretly carries a real, encrypted message that only
@@ -21,7 +21,7 @@ they read:    meet me at the pier at 8             ← only with the shared code
 The app does the whole flow for you — no copy/paste.
 
 ```
-┌──────────── HushLine ────────────┐
+┌──────────── iMET ────────────┐
 │  Enter the shared encryption code │
 │  [ •••••••••••••••••••••• ]        │
 │            [ Unlock ]             │
@@ -40,19 +40,19 @@ The app does the whole flow for you — no copy/paste.
 1. **Unlock** — type your shared encryption code. It stays in memory for the
    session only; it is never written to disk or sent anywhere.
 2. **Add a contact** — name + iMessage phone (E.164 like `+15551234567`) or
-   Apple ID email. Saved to `~/.hushline/contacts.json` (no secrets in there).
-3. **Send** — type a normal message, hit Send. HushLine encrypts it, hides it
+   Apple ID email. Saved to `~/.imet/contacts.json` (no secrets in there).
+3. **Send** — type a normal message, hit Send. iMET encrypts it, hides it
    in cover text, and the Messages app sends it over iMessage automatically.
 4. **Receive** — a background poller reads new iMessages; any that carry a
-   hidden HushLine payload are decrypted and shown in the conversation. Normal
+   hidden iMET payload are decrypted and shown in the conversation. Normal
    messages are ignored.
 
 ### Run it
 
 ```bash
-cd HushLine
+cd iMET
 pip install -e .          # Tkinter ships with the python.org macOS build
-hushline-app              # or:  python -m hushline.app
+imet-app              # or:  python -m imet.app
 ```
 
 ### One-time macOS permissions
@@ -61,34 +61,34 @@ hushline-app              # or:  python -m hushline.app
   prompt to let your terminal / Python **control Messages** — click OK (or
   System Settings → Privacy & Security → **Automation**).
 - **Receiving** reads `~/Library/Messages/chat.db`, which macOS protects. Grant
-  **Full Disk Access** to the app running HushLine (System Settings → Privacy &
-  Security → **Full Disk Access**). HushLine only ever reads this file. Until
+  **Full Disk Access** to the app running iMET (System Settings → Privacy &
+  Security → **Full Disk Access**). iMET only ever reads this file. Until
   you do, sending still works; the app just shows a note that it can't read
   replies yet.
 
-The other device needs HushLine too (or the CLI) and the **same code** — it
+The other device needs iMET too (or the CLI) and the **same code** — it
 receives a normal-looking iMessage and decrypts the hidden message.
 
 ## How it actually works
 
 iMessage is Apple's closed, end-to-end-encrypted system. There is no supported
-way to hook *inside* the Messages app, so HushLine drives it from the outside
+way to hook *inside* the Messages app, so iMET drives it from the outside
 the way macOS supports: **AppleScript automation to send**, and a **read-only
 poll of the local Messages database to receive**. On top of that:
 
-1. **Encryption** (`hushline/crypto.py`) — your real message is encrypted with
+1. **Encryption** (`imet/crypto.py`) — your real message is encrypted with
    **AES-256-GCM**. The key is derived from your shared code with **scrypt**
    (fresh random salt + nonce per message). This is what keeps the content
    secret and tamper-evident.
-2. **Steganography** (`hushline/stego.py`) — the encrypted bytes are encoded as
+2. **Steganography** (`imet/stego.py`) — the encrypted bytes are encoded as
    **invisible zero-width Unicode characters** and tucked inside a normal-looking
    cover sentence. This is what hides the *existence* of the message from a
    casual reader.
-3. **iMessage bridge** (`hushline/imessage.py`) — sends carrier text through
+3. **iMessage bridge** (`imet/imessage.py`) — sends carrier text through
    the Messages app and polls the Messages database to reveal incoming hidden
-   messages. The desktop app (`hushline/app.py`) wires these together.
+   messages. The desktop app (`imet/app.py`) wires these together.
 
-A clipboard-based CLI watcher (`hushline/watcher.py`) is also included for
+A clipboard-based CLI watcher (`imet/watcher.py`) is also included for
 quick use or other chat apps: copy your secret and it swaps your clipboard for
 the carrier; copy a received message and it reveals the hidden one.
 
@@ -98,33 +98,33 @@ code, shared once, in person or over a channel you already trust.
 ## Install
 
 ```bash
-cd HushLine
-pip install -e .            # core tool (CLI: `hushline`)
-pip install -e '.[clipboard]'   # add clipboard support for `hushline watch`
+cd iMET
+pip install -e .            # core tool (CLI: `imet`)
+pip install -e '.[clipboard]'   # add clipboard support for `imet watch`
 ```
 
 ## Use it
 
 ```bash
 # 1. Generate a code and share it with the other device (once).
-hushline newcode
+imet newcode
 #   willow-ember-quartz-otter-lantern-reef
 
 # 2. Save it on each device so you don't retype it.
-hushline setcode willow-ember-quartz-otter-lantern-reef   # -> ~/.hushline/code (0600)
+imet setcode willow-ember-quartz-otter-lantern-reef   # -> ~/.imet/code (0600)
 
 # 3. Hide a message. Copy the output into iMessage.
-hushline hide "meet me at the pier at 8" --cover "hey! how's your vacation going?"
+imet hide "meet me at the pier at 8" --cover "hey! how's your vacation going?"
 
 # 4. Reveal a message you received (paste it as the argument or on stdin).
-hushline reveal "hey! how's your vacation going?"
+imet reveal "hey! how's your vacation going?"
 #   meet me at the pier at 8
 ```
 
 ### Background mode
 
 ```bash
-hushline watch
+imet watch
 ```
 
 - **Sending:** type your secret with the trigger prefix — `>> meet at 8` —
@@ -133,13 +133,13 @@ hushline watch
 - **Receiving:** copy a message you got. If it hides a payload, the watcher
   decrypts it and shows the real message (console + a macOS notification).
 
-The code can come from `--code`, the `HUSHLINE_CODE` environment variable, or
-the saved `~/.hushline/code` file (checked in that order).
+The code can come from `--code`, the `IMET_CODE` environment variable, or
+the saved `~/.imet/code` file (checked in that order).
 
 ## As a library
 
 ```python
-from hushline import conceal, recover
+from imet import conceal, recover
 
 carrier = conceal("meet me at 8", "willow-ember-quartz", cover="hey how's your trip?")
 # carrier displays as "hey how's your trip?" but carries the encrypted message
@@ -150,7 +150,7 @@ recover(carrier, "willow-ember-quartz")   # -> "meet me at 8"
 
 - **The encryption protects the content; the steganography only hides that a
   message exists.** They are independent. Even if someone strips the invisible
-  characters or knows HushLine was used, they still cannot read the message
+  characters or knows iMET was used, they still cannot read the message
   without the code.
 - **Your security rests entirely on the code.** A short or guessable code can be
   brute-forced offline. Use the generated 6-word (or longer) codes, share them
@@ -174,17 +174,17 @@ pytest -q
 Layout:
 
 ```
-HushLine/
-  hushline/
+iMET/
+  imet/
     crypto.py    # AES-256-GCM + scrypt key derivation
     stego.py     # zero-width-character steganography
     codes.py     # shared-code generation
     contacts.py  # on-disk contact book (name + iMessage handle)
     imessage.py  # macOS: send via Messages automation, read chat.db
-    app.py       # Tkinter desktop app (`hushline-app`)
-    cli.py       # `hushline` command
+    app.py       # Tkinter desktop app (`imet-app`)
+    cli.py       # `imet` command
     watcher.py   # background clipboard watcher
   tests/
-    test_hushline.py
+    test_imet.py
     test_imessage.py
 ```

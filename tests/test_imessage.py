@@ -2,10 +2,10 @@ import json
 
 import pytest
 
-from hushline import imessage
-from hushline.contacts import ContactBook
-from hushline.app import ChatLog, _handle_matches_contact
-from hushline.contacts import Contact
+from imet import imessage
+from imet.contacts import ContactBook
+from imet.app import ChatLog, _handle_matches_contact
+from imet.contacts import Contact
 
 
 # ----------------------------------------------------------- phone matching

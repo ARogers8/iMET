@@ -1,14 +1,14 @@
-"""HushLine desktop app: unlock with a code, pick a contact, send encrypted.
+"""iMET desktop app: unlock with a code, pick a contact, send encrypted.
 
 What it does, end to end:
 
 1. You launch it and type your shared **encryption code** (nothing is sent or
    stored; it lives only in memory for this session).
 2. You pick a contact you've added (name + iMessage phone/email).
-3. You type a normal message and hit Send. HushLine encrypts it and hides it
+3. You type a normal message and hit Send. iMET encrypts it and hides it
    inside innocent cover text, then the Messages app sends it over iMessage
    automatically.
-4. A background poller watches for replies; any that carry a hidden HushLine
+4. A background poller watches for replies; any that carry a hidden iMET
    payload are decrypted and shown in the conversation. Everything else is
    ignored.
 
@@ -17,7 +17,7 @@ the python.org macOS build, so there's nothing extra to install for the UI.
 
 Run it with::
 
-    hushline-app        # or:  python -m hushline.app
+    imet-app        # or:  python -m imet.app
 """
 
 from __future__ import annotations
@@ -83,7 +83,7 @@ class _Poller(threading.Thread):
                 try:
                     revealed = recover(m.text, code)
                 except StegoError:
-                    continue  # a normal (non-HushLine) message; ignore it
+                    continue  # a normal (non-iMET) message; ignore it
                 except DecryptionError:
                     self._out.put((m.handle, "", "wrong_code"))
                     continue
@@ -95,7 +95,7 @@ def _handle_matches_contact(handle: str, contact: Contact) -> bool:
     return imessage._handles_match(handle, contact.phone)
 
 
-class HushLineApp:
+class IMETApp:
     def __init__(self, tk, ttk, messagebox, simpledialog):
         self.tk = tk
         self.ttk = ttk
@@ -111,7 +111,7 @@ class HushLineApp:
         self.poller: _Poller | None = None
 
         self.root = tk.Tk()
-        self.root.title("HushLine")
+        self.root.title("iMET")
         self.root.geometry("760x520")
         self._build_lock_screen()
 
@@ -121,7 +121,7 @@ class HushLineApp:
         self.lock = self.ttk.Frame(self.root, padding=40)
         self.lock.pack(fill="both", expand=True)
 
-        self.ttk.Label(self.lock, text="HushLine",
+        self.ttk.Label(self.lock, text="iMET",
                        font=("Helvetica", 24, "bold")).pack(pady=(10, 4))
         self.ttk.Label(
             self.lock,
@@ -152,7 +152,7 @@ class HushLineApp:
     def _unlock(self) -> None:
         code = self.code_var.get().strip()
         if not code:
-            self.messagebox.showwarning("HushLine", "Please enter a code.")
+            self.messagebox.showwarning("iMET", "Please enter a code.")
             return
         self.code = code
         self.lock.destroy()
@@ -226,7 +226,7 @@ class HushLineApp:
         try:
             self.contacts.add(name, phone)
         except ValueError as exc:
-            self.messagebox.showerror("HushLine", str(exc))
+            self.messagebox.showerror("iMET", str(exc))
             return
         self._refresh_contacts()
 
@@ -271,7 +271,7 @@ class HushLineApp:
 
     def _send(self) -> None:
         if not self.current:
-            self.messagebox.showinfo("HushLine", "Pick a contact first.")
+            self.messagebox.showinfo("iMET", "Pick a contact first.")
             return
         message = self.msg_var.get().strip()
         if not message:
@@ -279,7 +279,7 @@ class HushLineApp:
         try:
             carrier = conceal(message, self.code, cover=self.cover)
         except Exception as exc:  # pragma: no cover - defensive
-            self.messagebox.showerror("HushLine", f"Encryption failed: {exc}")
+            self.messagebox.showerror("iMET", f"Encryption failed: {exc}")
             return
 
         if imessage.is_supported():
@@ -351,7 +351,7 @@ def main() -> int:
         print("Tkinter is not available. On macOS, use the python.org build "
               "of Python, which bundles Tk.")
         return 1
-    HushLineApp(tk, ttk, messagebox, simpledialog).run()
+    IMETApp(tk, ttk, messagebox, simpledialog).run()
     return 0
 
 

@@ -1,9 +1,9 @@
 import pytest
 
-from hushline import conceal, recover, is_carrier
-from hushline import crypto, stego, codes
-from hushline.crypto import DecryptionError
-from hushline.stego import StegoError
+from imet import conceal, recover, is_carrier
+from imet import crypto, stego, codes
+from imet.crypto import DecryptionError
+from imet.stego import StegoError
 
 
 # ---------------------------------------------------------------- crypto layer

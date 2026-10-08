@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "hushline"
+name = "imet"
 version = "0.1.0"
 description = "Hide an AES-256-GCM encrypted message inside ordinary-looking chat text."
 readme = "README.md"
@@ -18,8 +18,8 @@ clipboard = ["pyperclip>=1.8"]
 dev = ["pytest>=7"]
 
 [project.scripts]
-hushline = "hushline.cli:main"
-hushline-app = "hushline.app:main"
+imet = "imet.cli:main"
+imet-app = "imet.app:main"
 
 [tool.setuptools.packages.find]
-include = ["hushline*"]
+include = ["imet*"]
