@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 
 from . import DecryptionError, StegoError, conceal, recover
 from . import imessage
+from . import covers
 from .contacts import Contact, ContactBook
 
 POLL_INTERVAL = 2.0  # seconds between chat.db checks
@@ -103,7 +104,9 @@ class IMETApp:
         self.simpledialog = simpledialog
 
         self.code: str | None = None
-        self.cover = DEFAULT_COVER
+        # None => auto-rotate covers so each message looks like a different,
+        # natural text. Setting a pinned cover overrides rotation.
+        self.cover = None
         self.contacts = ContactBook()
         self.log = ChatLog()
         self.current: Contact | None = None
@@ -234,9 +237,8 @@ class IMETApp:
         new = self.simpledialog.askstring(
             "Cover text",
             "Innocent text your messages will appear as:",
-            initialvalue=self.cover, parent=self.root)
-        if new:
-            self.cover = new
+            initialvalue=self.cover or "", parent=self.root)
+        self.cover = new.strip() if new and new.strip() else None
 
     def _on_select_contact(self, _event) -> None:
         sel = self.contact_list.curselection()
@@ -277,7 +279,8 @@ class IMETApp:
         if not message:
             return
         try:
-            carrier = conceal(message, self.code, cover=self.cover)
+            cover = self.cover or covers.next_cover()
+            carrier = conceal(message, self.code, cover=cover)
         except Exception as exc:  # pragma: no cover - defensive
             self.messagebox.showerror("iMET", f"Encryption failed: {exc}")
             return
